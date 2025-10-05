@@ -1,6 +1,7 @@
 #ifndef LIBZ_THREAD_LOCK_HPP_
 #define LIBZ_THREAD_LOCK_HPP_
 
+#include <utility>
 #include <zephyr/spinlock.h>
 
 namespace thread{
@@ -49,5 +50,35 @@ namespace thread{
     LockGuard(L *)->LockGuard<L>;
     template<class L>
     LockGuard(L &)->LockGuard<L>;
+
+    template<class V, class L = SpinLock>
+    struct SyncVar
+    {
+        constexpr SyncVar() = default;
+        constexpr SyncVar(V &&v):m_Var(std::move(v)) {}
+        constexpr SyncVar(const V &v):m_Var(v) {}
+
+        V exchange(V newVal)
+        {
+            LockGuard lg{m_Lock};
+            return std::exchange(m_Var, newVal);
+        }
+
+        V get() const
+        {
+            LockGuard lg{m_Lock};
+            return m_Var;
+        }
+
+        SyncVar& operator=(V newVal)
+        {
+            LockGuard lg{m_Lock};
+            m_Var = newVal;
+            return *this;
+        }
+    private:
+        mutable L m_Lock;
+        V m_Var;
+    };
 }
 #endif
