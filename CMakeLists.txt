@@ -4,5 +4,4 @@ project(NrfLibGeneral VERSION 1.0.0)
 add_library(NrfLibGeneral INTERFACE)
 
 target_include_directories(NrfLibGeneral INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-
-
+target_sources(NrfLibGeneral PRIVATE src/led.cpp)
